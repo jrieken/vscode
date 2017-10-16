@@ -25,7 +25,7 @@ import { IHeapService } from 'vs/workbench/api/electron-browser/mainThreadHeapSe
 import { ExtHostDocuments } from 'vs/workbench/api/node/extHostDocuments';
 import { ExtHostDocumentsAndEditors } from 'vs/workbench/api/node/extHostDocumentsAndEditors';
 import { getDocumentSymbols } from 'vs/editor/contrib/quickOpen/common/quickOpen';
-import { DocumentSymbolProviderRegistry, DocumentHighlightKind, Hover } from 'vs/editor/common/modes';
+import { DocumentSymbolProviderRegistry, DocumentHighlightKind, Hover, Command } from 'vs/editor/common/modes';
 import { getCodeLensData } from 'vs/editor/contrib/codelens/browser/codelens';
 import { getDefinitionsAtPosition, getImplementationsAtPosition, getTypeDefinitionsAtPosition } from 'vs/editor/contrib/goToDeclaration/browser/goToDeclaration';
 import { getHover } from 'vs/editor/contrib/hover/common/hover';
@@ -654,7 +654,7 @@ suite('ExtHostLanguageFeatures', function () {
 			return getCodeActions(model, model.getFullModelRange()).then(value => {
 				assert.equal(value.length, 2);
 
-				let [first, second] = value;
+				let [first, second] = <Command[]>value;
 				assert.equal(first.title, 'Testing1');
 				assert.equal(first.id, 'test1');
 				assert.equal(second.title, 'Testing2');

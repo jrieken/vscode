@@ -5,7 +5,7 @@
 
 'use strict';
 
-import { CodeActionProvider, TextDocument, Range, CancellationToken, CodeActionContext, Command, commands, workspace, WorkspaceEdit, window, QuickPickItem, Selection } from 'vscode';
+import { CodeActionProvider, TextDocument, Range, CancellationToken, CodeActionContext, commands, workspace, WorkspaceEdit, window, QuickPickItem, Selection, CodeAction } from 'vscode';
 
 import * as Proto from '../protocol';
 import { ITypeScriptServiceClient } from '../typescriptService';
@@ -28,12 +28,17 @@ export default class TypeScriptRefactorProvider implements CodeActionProvider {
 		commands.registerCommand(this.selectRefactorCommandId, this.selectRefactoring, this);
 	}
 
-	public async provideCodeActions(
+	public async provideCodeActions() {
+		// Uses provideCodeActions2 instead
+		return [];
+	}
+
+	public async provideCodeActions2(
 		document: TextDocument,
 		range: Range,
 		_context: CodeActionContext,
 		token: CancellationToken
-	): Promise<Command[]> {
+	): Promise<CodeAction[]> {
 		if (!this.client.apiVersion.has240Features()) {
 			return [];
 		}
@@ -50,20 +55,26 @@ export default class TypeScriptRefactorProvider implements CodeActionProvider {
 				return [];
 			}
 
-			const actions: Command[] = [];
+			const actions: CodeAction[] = [];
 			for (const info of response.body) {
 				if (info.inlineable === false) {
 					actions.push({
 						title: info.description,
-						command: this.selectRefactorCommandId,
-						arguments: [document, file, info, range]
+						command: {
+							title: info.description,
+							command: this.selectRefactorCommandId,
+							arguments: [document, file, info, range]
+						}
 					});
 				} else {
 					for (const action of info.actions) {
 						actions.push({
-							title: action.description,
-							command: this.doRefactorCommandId,
-							arguments: [document, file, info.name, action.name, range]
+							title: info.description,
+							command: {
+								title: info.description,
+								command: this.doRefactorCommandId,
+								arguments: [document, file, info.name, action.name, range]
+							}
 						});
 					}
 				}

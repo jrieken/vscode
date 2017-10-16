@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CodeActionProvider, TextDocument, Range, CancellationToken, CodeActionContext, Command, commands } from 'vscode';
+import { CodeActionProvider, TextDocument, Range, CancellationToken, CodeActionContext, CodeAction, commands } from 'vscode';
 
 import * as Proto from '../protocol';
 import { ITypeScriptServiceClient } from '../typescriptService';
@@ -29,12 +29,22 @@ export default class TypeScriptCodeActionProvider implements CodeActionProvider 
 		commands.registerCommand(this.commandId, this.onCodeAction, this);
 	}
 
-	public async provideCodeActions(
+	public provideCodeActions(
+		_document: TextDocument,
+		_range: Range,
+		_context: CodeActionContext,
+		_token: CancellationToken
+	) {
+		// Uses provideCodeActions2 instead
+		return [];
+	}
+
+	public async provideCodeActions2(
 		document: TextDocument,
 		range: Range,
 		context: CodeActionContext,
 		token: CancellationToken
-	): Promise<Command[]> {
+	): Promise<CodeAction[]> {
 		if (!this.client.apiVersion.has213Features()) {
 			return [];
 		}
@@ -80,11 +90,14 @@ export default class TypeScriptCodeActionProvider implements CodeActionProvider 
 			.filter(code => supportedActions[code]));
 	}
 
-	private getCommandForAction(action: Proto.CodeAction, file: string): Command {
+	private getCommandForAction(action: Proto.CodeAction, file: string): CodeAction {
 		return {
 			title: action.description,
-			command: this.commandId,
-			arguments: [action, file]
+			command: {
+				title: action.description,
+				command: this.commandId,
+				arguments: [action, file]
+			}
 		};
 	}
 

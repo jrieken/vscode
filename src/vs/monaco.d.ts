@@ -4094,7 +4094,7 @@ declare module monaco.languages {
 		/**
 		 * Provide commands for the given document and range.
 		 */
-		provideCodeActions(model: editor.IReadOnlyModel, range: Range, context: CodeActionContext, token: CancellationToken): Command[] | Thenable<Command[]>;
+		provideCodeActions(model: editor.IReadOnlyModel, range: Range, context: CodeActionContext, token: CancellationToken): (Command | CodeAction)[] | Thenable<(Command | CodeAction)[]>;
 	}
 
 	/**
@@ -4528,6 +4528,13 @@ declare module monaco.languages {
 	export enum SuggestTriggerKind {
 		Invoke = 0,
 		TriggerCharacter = 1,
+	}
+
+	export interface CodeAction {
+		title: string;
+		command?: Command;
+		edits?: TextEdit[] | WorkspaceEdit;
+		diagnostics?: editor.IModelDecoration[];
 	}
 
 	/**
