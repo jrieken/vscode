@@ -9,7 +9,7 @@ import * as Proto from '../protocol';
 import { ITypeScriptServiceClient } from '../typescriptService';
 import { vsRangeToTsFileRange } from '../utils/convert';
 import FormattingConfigurationManager from './formattingConfigurationManager';
-import { applyCodeAction } from '../utils/codeAction';
+import { getEditForCodeAction, applyCodeActionCommands } from '../utils/codeAction';
 
 interface NumberSet {
 	[key: number]: boolean;
@@ -97,11 +97,13 @@ export default class TypeScriptCodeActionProvider implements CodeActionProvider 
 				title: action.description,
 				command: this.commandId,
 				arguments: [action, file]
-			}
+			},
+			edits: getEditForCodeAction(this.client, action),
+			diagnostics: []
 		};
 	}
 
 	private onCodeAction(action: Proto.CodeAction, file: string): Promise<boolean> {
-		return applyCodeAction(this.client, action, file);
+		return applyCodeActionCommands(this.client, action, file);
 	}
 }
